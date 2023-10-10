@@ -1,0 +1,396 @@
+.border {
+    border: groove black 1px;
+}
+
+.button {
+    height: 40px;
+    border-radius: 10px;
+    background-color: #000000;
+    font-weight: 800;
+    color: white;
+}
+
+input {
+    font: inherit;
+    width: 92%;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0 10px;
+}
+
+.message-container {
+    margin: 0 auto;
+    min-width: 800px;
+    max-width: 1100px;
+    padding: 10px;
+    border: 1px solid black;
+    border-radius: 10px;
+}
+
+.message-hint {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    padding: 5px;
+}
+
+.messageTitleBlock {
+    flex: 10;
+    text-align: center;
+    border-radius: 5px;
+    margin: 0 10px 0 0;
+    justify-content: bottom;
+}
+
+.messageDateBlock {
+    flex: 3;
+    text-align: center;
+}
+
+.messageButtonBlock {
+    margin-left: 50px;
+    flex: 2;
+    justify-content: space-between;
+    display: flex;
+    flex-direction: row;
+}
+
+.sortingBlock {
+    width: 140px;
+    margin-right: 60px
+}
+
+#getAllMessagesForm {
+    text-align: center;
+}
+
+.tablehint {
+    font-weight: bolder;
+    border-bottom: 1px solid black;
+    margin: 0 15px;
+    vertical-align: middle;
+}
+
+.inactive {
+    background: inherit;
+    border: none;
+}
+
+.messageBody {
+    height: 30vh;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid black;
+    margin: 0 30px 10px 30px;
+    display: none;
+    text-align: justify;
+    overflow-y: auto;
+    align-items: stretch;
+}
+
+.message {
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid black;
+}
+
+.message-descr {
+    border-bottom: 1px solid black;
+    margin-bottom: 10px;
+}
+
+#paginationMenu {
+    display: flex;
+    justify-content: center;
+    height: 54px;
+    width: 400px;
+    margin: 10px auto;
+}
+
+.paginationjs-pages > ul > li {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 30px;
+}
+
+.paginationjs-prev,
+.paginationjs-next {
+    border: 1px solid black;
+    margin: 0 20px;
+}
+
+.activePage {
+    background-color: rgb(255, 200, 200);
+}
+
+.paginationjs-pages {
+    display: flex;
+}
+
+.messagesList {
+    height: 500px;
+    display: none;
+    overflow-y: auto;
+}
+
+.block {
+    display: flex;
+    align-items: center;
+}
+
+.hidden {
+    display: none;
+}
+
+.restButtons {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.scrollbar::-webkit-scrollbar {
+    width: 10px;
+}
+
+.scrollbar::-webkit-scrollbar-track {
+    background: inherit;
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+    background: #D6D1B1;
+    border-radius: 8px;
+}
+
+.scrollbar {
+    padding: 0 20px;
+    margin-right: 20px;
+}
+
+.messageButton {
+    font-weight: 500;
+    font-size: 13px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.getMessageBodyButton {
+    width: 70px;
+    background-color: #3498db;
+    color: #fff;
+}
+
+.getMessageBodyButton:hover {
+    background-color: #2980b9;
+}
+
+.deleteMessageButton {
+    margin-top: 5px;
+    background-color: #e74c3c;
+    color: #fff;
+}
+
+.deleteMessageButton {
+    background-color: #d52c1e;
+}
+
+.updateMessageButton {
+    background-color: #27ae60;
+    color: #fff;
+}
+
+.updateMessageButton:hover {
+    background-color: #219d55;
+}
+
+.titleInputBlock {
+    background-color: inherit;
+    border: none;
+    width: 100%;
+}
+
+.bodyInputBlock {
+    background-color: inherit;
+    border: none;
+    margin: 0 auto;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    resize: none;
+}
+
+.white {
+    background: white;
+}
+
+.tablehint > .messageDateBlock {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.tablehint > .messageTitleBlock {
+    align-self: center;
+}
+
+.messageDateBlock > input {
+    margin: 3px 0;
+    width: 130px;
+}
+
+.messageDateBlock > button {
+    border: none;
+    border-radius: 5px;
+    padding: 2px 5px;
+}
+
+.buttons {
+    display: flex;
+    justify-content: center;
+}
+
+.buttons > * {
+    margin: 0 10px;
+}
+
+.modal-content {
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50%;
+    /*    height: 300px;*/
+    text-align: justify;
+    background: #BFC3BA;
+    padding: 15px;
+    border-radius: 20px;
+}
+
+.modal-content > input {
+    height: 80px;
+}
+
+.modal-content > textarea {
+    height: 150px;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(0, 0, 0);
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: none;
+}
+
+.logout-block {
+    display: flex;
+    position: absolute;
+    top: 50px;
+    right: 40px;
+    height: 40px;
+    width: 70px;
+    background-color: pink;
+    border-radius: 5px;
+    align-items: center;
+    justify-content: center;
+}
+
+.fieldsets {
+    border: none;
+    margin: 10px 0 0 0;
+}
+
+#toast {
+    visibility: hidden;
+    min-width: 250px;
+    margin-left: -125px;
+    color: #fff;
+    text-align: center;
+    border-radius: 10px;
+    padding: 16px;
+    position: fixed;
+    z-index: 1;
+    left: 50%;
+    top: 30px;
+}
+
+#toast.show {
+    visibility: visible;
+    -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+
+#toast.success {
+    background-color: limegreen;
+}
+
+#toast.error {
+    background-color: red;
+}
+
+@-webkit-keyframes fadein {
+    from {
+        top: 0;
+        opacity: 0;
+    }
+
+    to {
+        top: 30px;
+        opacity: 1;
+    }
+}
+
+@keyframes fadein {
+    from {
+        top: 0;
+        opacity: 0;
+    }
+
+    to {
+        top: 30px;
+        opacity: 1;
+    }
+}
+
+@-webkit-keyframes fadeout {
+    from {
+        top: 30px;
+        opacity: 1;
+    }
+
+    to {
+        top: 0;
+        opacity: 0;
+    }
+}
+
+@keyframes fadeout {
+    from {
+        top: 30px;
+        opacity: 1;
+    }
+
+    to {
+        top: 0;
+        opacity: 0;
+    }
+}

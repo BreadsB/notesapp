@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <title>Messages</title>
+    <link rel="stylesheet" th:href="@{/css/view-messages.css}">
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <link rel="stylesheet" th:href="@{/jquery-ui/jquery-ui.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300&display=swap" rel="stylesheet">
+    <link rel="shortcut icon" href="">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+</head>
+
+<body>
+    <section>
+        <form th:action="@{/perform_logout}" method="post" th:hidden="true" name="logoutForm">
+            <input type="submit" value="Logout" hidden="true"/>
+        </form>
+        <a id="logoutLink" href="/">
+            <div class="logout-block">Logout</div>
+        </a>
+    </section>
+
+    <section>
+        <div class="buttons">
+            <form action="http://localhost:8080/api/notes/" method="get" id="getAllMessagesForm">
+                <button name="getAllMessages" data-button-get-all-messages type="button" class="button">Fetch messages</button>
+            </form>
+            <button id="createMessageButton" class="button">Create message</button>
+        </div>
+        <div id="paginationMenu"></div>
+    </section>
+
+    <div class="message-container">
+        <div class="message-hint tablehint">
+            <div class="messageTitleBlock">Title</div>
+            <div class="messageDateBlock">Created date
+                <input type='date' _datePicker class="hidden">
+                <button _dateFilter class="hidden">Filter</button>
+            </div>
+            <div class="sortingBlock">
+                <select _sortingBlock class="hidden">
+                    <option value="sortDateUp">Sort by created date ascending</option>
+                    <option value="sortDateDown">Sort by created date descending</option>
+                    <option value="sortTitleUp">Sort by title A-Z</option>
+                    <option value="sortTitleDown">Sort by title Z-A</option>
+                </select>
+            </div>
+        </div>
+        <ul data-messages-list class="messagesList scrollbar">
+        </ul>
+    </div>
+    <div class="modal">
+        <div class="modal-content">
+            <form action="http://localhost:8080/api/notes/" method="POST" data-note-add-form>
+                <label for="inputTitle">Title:</label>
+                <input id="inputTitle" maxlength="100" name="Title" required="required" type="text" placeholder="Type title" />
+                <label for="inputText">Note&#39;s body</label>
+                <textarea id="inputText" placeholder="Type your message here" cols="70" name="Notes Body" required="required" rows="10"></textarea>
+                <fieldset class="fieldsets">
+                    <button type="submit" name="sendButton" class="button" id="sendButton">Send data</button>
+                    <button type="reset" name="clearButton" class="button" id="clearButton">Clear fields</button>
+                    <button type="button" name="cancelButton" class="button" id="cancelButton">Cancel</button>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+    <script th:src="@{/js/jquery-3.7.0.min.js}"></script>
+    <script th:src="@{/jquery-ui/jquery-ui.min.js}"></script>
+    <script th:src="@{/js/pagination.js.org_dist_2.6.0_pagination.js}"></script>
+    <script th:src="@{/js/view-messages.js}"></script>
+</body>
+</html>
