@@ -18,7 +18,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @PropertySource("classpath:security-config.properties")
 public class SecSecurityConfig {
 
-    @Value("${security.login.user}")
+    @Value("${=}")
     private String userLogin;
 
     @Value("${security.password.user}")
