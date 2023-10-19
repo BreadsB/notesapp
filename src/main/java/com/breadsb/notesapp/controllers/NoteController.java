@@ -2,6 +2,7 @@ package com.breadsb.notesapp.controllers;
 
 import com.breadsb.notesapp.entities.Note;
 import com.breadsb.notesapp.services.NoteService;
+import io.github.bucket4j.Bucket;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -9,24 +10,36 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/notes/")
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 @CrossOrigin("*")
 public class NoteController {
 
+    @Autowired
     private final NoteService service;
     private final String apiPath = "http://localhost:8080/api/notes/";
+
+    Bucket bucket;
+
+    public NoteController(NoteService service) {
+        this.service = service;
+        bucket = Bucket.builder()
+                .addLimit(limit -> limit.capacity(6).refillGreedy(6,Duration.ofMinutes(1)))
+                .build();
+    }
 
     @Operation(summary = "Get a note by its id")
     @ApiResponses(value = {
@@ -41,7 +54,10 @@ public class NoteController {
     })
     @GetMapping("{id}")
     public ResponseEntity<Note> get(@Parameter(description = "Id of a book to search") @PathVariable Long id) {
-        return ResponseEntity.ok(service.getNoteById(id));
+        if (bucket.tryConsume(1)) {
+            return ResponseEntity.ok(service.getNoteById(id));
+        }
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
     }
 
     @Operation(summary = "Create a new Note")
@@ -52,9 +68,12 @@ public class NoteController {
     })
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> post(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Note JSON object to be transfered") @Valid @RequestBody Note note) {
-        service.createNote(note);
-        String uri = apiPath + note.getId();
-        return ResponseEntity.created(URI.create(uri)).build();
+        if (bucket.tryConsume(1)) {
+            service.createNote(note);
+            String uri = apiPath + note.getId();
+            return ResponseEntity.created(URI.create(uri)).build();
+        }
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
     }
 
     @Operation(summary = "Get all existing messages")
@@ -68,7 +87,10 @@ public class NoteController {
     })
     @GetMapping
     public ResponseEntity<List<Note>> getAll() {
-        return ResponseEntity.ok(service.getAllNotes());
+        if (bucket.tryConsume(1)) {
+            return ResponseEntity.ok(service.getAllNotes());
+        }
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
     }
 
     @Operation(summary = "Update message with supplied id")
@@ -81,9 +103,12 @@ public class NoteController {
     @PutMapping(value = "{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Note> put(@Parameter(description = "Id of a Note to update") @PathVariable Long id,
                                     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Note JSON object") @Valid @RequestBody Note note) {
-        service.updateNote(id, note);
-        String uri = apiPath + id;
-        return ResponseEntity.created(URI.create(uri)).build();
+        if (bucket.tryConsume(1)) {
+            service.updateNote(id, note);
+            String uri = apiPath + id;
+            return ResponseEntity.created(URI.create(uri)).build();
+        }
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
     }
 
     @Operation(summary = "Delete message with supplied id")
@@ -112,6 +137,9 @@ public class NoteController {
             @Parameter(description = "Time and date when notes were created")
             @RequestParam("timestamp")
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime localDate) {
-        return ResponseEntity.ok(service.findByCreatedAt(localDate));
+        if (bucket.tryConsume(1)) {
+            return ResponseEntity.ok(service.findByCreatedAt(localDate));
+        }
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
     }
 }

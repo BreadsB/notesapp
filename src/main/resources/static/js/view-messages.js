@@ -75,9 +75,7 @@ $(document).ready(function () {
                 }
             },
             error: function (xhr, textStatus, errorThrown) {
-                console.log('Error occured' + textStatus);
-                console.log('xhr: ' + xhr);
-                console.log('Error: ' + errorThrown);
+                showError("Error creating new note", xhr);
             },
             complete: function () {
                 modal.hide();
@@ -247,7 +245,7 @@ $(document).ready(function () {
         var bodyText = body.text();
         var messageId = id;
 
-        var titleInput = $('<input>').addClass('titleInputBlock block ').val(titleText);
+        var titleInput = $('<input>').addClass('titleInputBlock block').val(titleText);
         title.text('');
         title.append(titleInput);
         title.addClass('white');
@@ -275,8 +273,7 @@ $(document).ready(function () {
                     afterUpdate(button);
                 },
                 error: function (xhr, textStatus, errorThrown) {
-                    console.log("Error at updating: " + textStatus + ", " + errorThrown);
-                    console.log("Response Text:", xhr.responseText);
+                    showError("Error - could not update data", xhr);
                 }
             });
         })
@@ -319,8 +316,8 @@ $(document).ready(function () {
                                 message.remove();
                                 showConfirm();
                             },
-                            error: function (response) {
-                                console.log("ERROR: Did not deleted message. " + response);
+                            error: function (xhr) {
+                                showError("Error - could not delete message", xhr);
                             }
                         });
                         $(this).dialog("close");
@@ -340,8 +337,8 @@ $(document).ready(function () {
             method: "GET",
             dataType: 'json',
             success: getMessages,
-            error: function () {
-                console.log("Error fetching data from the server");
+            error: function (xhr) {
+                showError("Error at fetching all data from server", xhr);
             }
         });
     }
@@ -374,7 +371,7 @@ $(document).ready(function () {
                 data: requestData,
                 success: getMessages,
                 error: function (xhr, textStatus, errorThrown) {
-                    console.log("Error");
+                    showError("Error at filtering data", xhr);
                 }
             })
         } else {
@@ -384,7 +381,7 @@ $(document).ready(function () {
                 contentType: "application/json",
                 success: getMessages,
                 error: function (xhr, textStatus, errorThrown) {
-                    console.log("Error");
+                    showError("Error at filtering data", xhr);
                 }
             })
         }
@@ -457,4 +454,16 @@ $(document).ready(function () {
             confirmDiv.toggleClass('show');
         }, 3000);
     }
+
+        function showError(message, xhr) {
+            if (xhr.status == "429") {
+                message = "Too many requests";
+            }
+            var confirmDiv = $('<div>').attr('id', 'toast').addClass('show').addClass('error').text(message);
+            htmlBody.append(confirmDiv);
+
+            setTimeout(function () {
+                confirmDiv.toggleClass('show');
+            }, 3000);
+        }
 });
