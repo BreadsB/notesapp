@@ -11,6 +11,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -20,7 +23,9 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/notes/")
@@ -86,9 +91,17 @@ public class NoteController {
                     })
     })
     @GetMapping
-    public ResponseEntity<List<Note>> getAll() {
+    public ResponseEntity<List<Note>> getAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
         if (bucket.tryConsume(1)) {
-            return ResponseEntity.ok(service.getAllNotes());
+            Page<Note> pagedResult = service.getAllNotes(PageRequest.of(page,size));
+            if (pagedResult.hasContent()) {
+                return ResponseEntity.ok(pagedResult.getContent());
+            } else {
+                ResponseEntity.ok(Collections.emptyList());
+            }
         }
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
     }

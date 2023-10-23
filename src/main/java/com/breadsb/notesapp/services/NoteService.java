@@ -5,6 +5,8 @@ import com.breadsb.notesapp.exceptions.MessageBodyTooLongException;
 import com.breadsb.notesapp.exceptions.ResourceNotFoundException;
 import com.breadsb.notesapp.repositories.NoteRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -30,8 +32,8 @@ public class NoteService {
         return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Note not found"));
     }
 
-    public List<Note> getAllNotes() {
-        return repository.findAll();
+    public Page<Note> getAllNotes(Pageable pageable) {
+        return repository.findAll(pageable);
     }
 
     public void deleteNoteById(Long id) {
