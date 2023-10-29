@@ -200,8 +200,8 @@ $(document).ready(function () {
                     }
                     break;
                 case 'sortTitleUp':
-                    var aTitle = a.title;
-                    var bTitle = b.title;
+                    var aTitle = a.title.toLowerCase();
+                    var bTitle = b.title.toLowerCase();
 
                     if (aTitle > bTitle) {
                         return 1;
@@ -212,8 +212,8 @@ $(document).ready(function () {
                     }
                     break;
                 case 'sortTitleDown':
-                    var aTitle = a.title;
-                    var bTitle = b.title;
+                    var aTitle = a.title.toLowerCase();
+                    var bTitle = b.title.toLowerCase();
 
                     if (aTitle > bTitle) {
                         return -1;
