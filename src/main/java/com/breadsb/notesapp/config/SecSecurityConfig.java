@@ -21,10 +21,10 @@ import org.springframework.security.web.SecurityFilterChain;
 @PropertySource("classpath:security-config.properties")
 public class SecSecurityConfig {
 
-    @Value("${security.login.user}")
+    @Value("${sm://security_user_login}")
     private String userLogin;
 
-    @Value("${security.password.user}")
+    @Value("${sm://security_user_password}")
     private String userPassword;
 
     @Bean
