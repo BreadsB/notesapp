@@ -1,7 +1,8 @@
 $(document).ready(function () {
 
     var htmlBody = $('body');
-    var apiRoot = "http://localhost:8080/api/notes/";
+//    var apiRoot = "https://noteapp-399113.appspot.com/api/notes/";
+    var apiRoot = window.location.origin + "/api/notes/";
     var getButton = $('[name="getAllMessages"]');
     var messagesList = $('[data-messages-list]');
     var itemsPerPage = 10;
@@ -18,7 +19,6 @@ $(document).ready(function () {
     var inputTitle = $('#inputTitle');
     var inputText = $('#inputText');
     var fetchedMessagesList;
-    
     var token = $("meta[name='_csrf']").attr("content");
     var header = $("meta[name='_csrf_header']").attr("content");
     

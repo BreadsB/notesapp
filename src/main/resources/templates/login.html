@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <script src="https://cdn.tailwindcss.com"></script>
     <title>Sign in</title>
+    <link rel="shortcut icon" href="">
 </head>
 <body>
 <div class="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
@@ -37,7 +39,9 @@
             </div>
         </div>
     </div>
+    <div class="absolute bottom-[3vh] self-center">
+        <p>BreadsB Solutions 2023</p>
+    </div>
 </div>
-
 </body>
 </html>

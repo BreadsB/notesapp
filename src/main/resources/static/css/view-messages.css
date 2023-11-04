@@ -398,3 +398,10 @@ form {
         opacity: 0;
     }
 }
+
+.breadsb-sign {
+    position: absolute;
+    bottom: 5vh;
+    width: 100%;
+    text-align: center;
+}

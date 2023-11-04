@@ -30,8 +30,8 @@ public class NoteController {
 
     @Autowired
     private final NoteService service;
-    private final String apiPath = "http://localhost:8080/api/notes/";
-
+//    private final String API_PATH = "https://noteapp-399113.appspot.com/api/notes/";
+    private final String path = "${pageContext.request.requestURL}";
     Bucket bucket;
 
     public NoteController(NoteService service) {
@@ -39,6 +39,7 @@ public class NoteController {
         bucket = Bucket.builder()
                 .addLimit(limit -> limit.capacity(6).refillGreedy(6,Duration.ofMinutes(1)))
                 .build();
+        System.out.println(path);
     }
 
     @Operation(summary = "Get a note by its id")
@@ -70,8 +71,9 @@ public class NoteController {
     public ResponseEntity<Void> post(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Note JSON object to be transfered") @Valid @RequestBody Note note) {
         if (bucket.tryConsume(1)) {
             service.createNote(note);
-            String uri = apiPath + note.getId();
-            return ResponseEntity.created(URI.create(uri)).build();
+//            String uri = apiPath + note.getId();
+//            return ResponseEntity.created(URI.create(uri)).build();
+            return ResponseEntity.ok().build();
         }
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
     }
@@ -105,8 +107,9 @@ public class NoteController {
                                     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Note JSON object") @Valid @RequestBody Note note) {
         if (bucket.tryConsume(1)) {
             service.updateNote(id, note);
-            String uri = apiPath + id;
-            return ResponseEntity.created(URI.create(uri)).build();
+//            String uri = apiPath + id;
+//            return ResponseEntity.created(URI.create(uri)).build();
+            return ResponseEntity.ok().build();
         }
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
     }
@@ -123,9 +126,6 @@ public class NoteController {
         return ResponseEntity.ok().build();
     }
 
-    //    Example of usage:
-    //    http://localhost:8080/api/notes/by-date/?timestamp=2023-09-11T00:00:00
-    //    Above will return list of notes that has been created at the 2023-09-11 (11th September)
     @Operation(summary = "Find all messages created at supplied Date&Time")
     @ApiResponses( value = {
             @ApiResponse(responseCode = "200", description = "Found notes", content = @Content),

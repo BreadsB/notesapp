@@ -8,12 +8,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300&display=swap" rel="stylesheet">
-    <link rel="shortcut icon" href="">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <link rel="shortcut icon" href="">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
 </head>
 
 <body>
@@ -28,7 +29,7 @@
 
     <section>
         <div class="buttons">
-            <form action="http://localhost:8080/api/notes/" method="get" id="getAllMessagesForm">
+            <form action="https://noteapp-399113.appspot.com/api/notes/" method="get" id="getAllMessagesForm">
                 <button name="getAllMessages" data-button-get-all-messages type="button" class="button">Fetch messages</button>
             </form>
             <button id="createMessageButton" class="button">Create message</button>
@@ -57,7 +58,7 @@
     </div>
     <div class="modal">
         <div class="modal-content">
-            <form action="http://localhost:8080/api/notes/" method="POST" data-note-add-form>
+            <form action="https://noteapp-399113.appspot.com/api/notes/" method="POST" data-note-add-form>
                 <label for="inputTitle">Title:</label>
                 <input id="inputTitle" maxlength="100" name="Title" required="required" type="text" placeholder="Type title" />
                 <label for="inputText">Note&#39;s body</label>
@@ -69,6 +70,9 @@
                 </fieldset>
             </form>
         </div>
+    </div>
+    <div class="breadsb-sign">
+        BreadsB Solutions 2023
     </div>
     <script th:src="@{/js/jquery-3.7.0.min.js}"></script>
     <script th:src="@{/jquery-ui/jquery-ui.min.js}"></script>
