@@ -7,10 +7,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.event.AbstractAuthenticationEvent;
 import org.springframework.security.authentication.event.AuthenticationFailureBadCredentialsEvent;
 import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Component;
 
@@ -92,7 +95,7 @@ public class LoginAttemptServiceImpl implements LoginAttemptService, Application
                         && null != ctxMap.get(attempt.getUser())
                         && !ctxMap.get(attempt.getUser()).isEmpty())
                 .map(Attempt::getUser).toList();
-        if (badUsers.size() > 0) LOGGER.debug("Found {} users for processing", badUsers.size());
+        if (!badUsers.isEmpty()) LOGGER.debug("Found {} users for processing", badUsers.size());
         for (String badUser : badUsers) {
             final List<AsyncContext> chainNAsyncContexts = ctxMap.get(badUser);
             if (null != chainNAsyncContexts)
@@ -101,5 +104,14 @@ public class LoginAttemptServiceImpl implements LoginAttemptService, Application
                 }
         }
         badUsers.forEach(badUser -> ctxMap.get(badUser).clear());
+    }
+
+    public boolean isAuthenticated() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || AnonymousAuthenticationToken.class.isAssignableFrom(authentication.getClass())) {
+            return false;
+        } else {
+            return authentication.isAuthenticated();
+        }
     }
 }
