@@ -15,3 +15,5 @@ Technology stack:
 Application is secured from:
 - Brute-force login attempts
 - CSRF attack
+
+This repository is build on this module: https://github.com/BreadsB/spring-review/tree/master/notes
