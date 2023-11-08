@@ -1,5 +1,6 @@
 # Note taking app
-This is a simple note taking app build on Spring Boot and secured with login page by Spring Security.
+This is a simple note taking app build on Spring Boot and secured with login page by Spring Security.<br>
+Link to app: **https://noteapp-399113.appspot.com/**
 
 Technology stack:
 - Spring Boot
@@ -10,3 +11,7 @@ Technology stack:
 - Spring JPA
 - Swagger (Describing REST API)
 - Thymeleaf (process web files and connect them with Spring Boot app)
+
+Application is secured from:
+- Brute-force login attempts
+- CSRF attack
