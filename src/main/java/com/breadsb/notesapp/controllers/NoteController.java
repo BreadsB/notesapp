@@ -30,8 +30,7 @@ public class NoteController {
 
     @Autowired
     private final NoteService service;
-//    private final String API_PATH = "https://noteapp-399113.appspot.com/api/notes/";
-    private final String path = "${pageContext.request.requestURL}";
+    private final String API_PATH = "${pageContext.request.requestURL}";
     Bucket bucket;
 
     public NoteController(NoteService service) {
@@ -39,7 +38,6 @@ public class NoteController {
         bucket = Bucket.builder()
                 .addLimit(limit -> limit.capacity(6).refillGreedy(6,Duration.ofMinutes(1)))
                 .build();
-        System.out.println(path);
     }
 
     @Operation(summary = "Get a note by its id")
@@ -71,7 +69,7 @@ public class NoteController {
     public ResponseEntity<Void> post(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Note JSON object to be transfered") @Valid @RequestBody Note note) {
         if (bucket.tryConsume(1)) {
             service.createNote(note);
-//            String uri = apiPath + note.getId();
+//            String uri = API_PATH + note.getId();
 //            return ResponseEntity.created(URI.create(uri)).build();
             return ResponseEntity.ok().build();
         }
@@ -107,7 +105,7 @@ public class NoteController {
                                     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Note JSON object") @Valid @RequestBody Note note) {
         if (bucket.tryConsume(1)) {
             service.updateNote(id, note);
-//            String uri = apiPath + id;
+//            String uri = API_PATH + id;
 //            return ResponseEntity.created(URI.create(uri)).build();
             return ResponseEntity.ok().build();
         }

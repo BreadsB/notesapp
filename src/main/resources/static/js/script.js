@@ -1,6 +1,6 @@
 $(document).ready(function () {
 
-    var apiUrl = "http://localhost:8080/api/notes/";
+    var apiUrl = window.location.origin + "/api/notes/";
 
     fetchMessages();
 
@@ -9,8 +9,6 @@ $(document).ready(function () {
             var messageList = $(".listContent");
             var textOpen = "Open";
             var textClose = "Close";
-
-            //            var list = sortListByDate(data);
             var list = sortListByTitle(data);
 
             $.each(list, function (i, element) {

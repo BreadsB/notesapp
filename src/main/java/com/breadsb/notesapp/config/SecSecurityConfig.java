@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.AbstractRequestMatcherRegistry;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.User;
@@ -50,6 +51,8 @@ public class SecSecurityConfig {
                         .hasRole("USER")
                         .requestMatchers("/login")
                         .permitAll()
+//                        .requestMatchers("/favico.ico")
+//                        .permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
@@ -60,14 +63,16 @@ public class SecSecurityConfig {
                 )
                 .sessionManagement(session -> session
                         .maximumSessions(2)
-//                        .maxSessionsPreventsLogin(true)
-
                 )
                 .logout(logout -> logout
                         .logoutUrl("/perform_logout")
                         .deleteCookies("JSESSIONID")
                         .permitAll()
                 );
+//                .requiresChannel(channel -> channel
+//                        .requestMatchers(r -> r.getHeader("X-Forwarded-Proto") != null)
+//                        .requiresSecure()
+//                );
 
         return http.build();
     }
