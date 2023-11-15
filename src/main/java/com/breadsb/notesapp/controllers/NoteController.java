@@ -1,6 +1,7 @@
 package com.breadsb.notesapp.controllers;
 
 import com.breadsb.notesapp.entities.Note;
+import com.breadsb.notesapp.services.NotePaginatedService;
 import com.breadsb.notesapp.services.NoteService;
 import io.github.bucket4j.Bucket;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,6 +12,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -30,11 +33,14 @@ public class NoteController {
 
     @Autowired
     private final NoteService service;
+    @Autowired
+    private final NotePaginatedService paginatedService;
     private final String API_PATH = "${pageContext.request.requestURL}";
     Bucket bucket;
 
-    public NoteController(NoteService service) {
+    public NoteController(NoteService service, NotePaginatedService paginatedService) {
         this.service = service;
+        this.paginatedService = paginatedService;
         bucket = Bucket.builder()
                 .addLimit(limit -> limit.capacity(6).refillGreedy(6,Duration.ofMinutes(1)))
                 .build();
@@ -137,6 +143,24 @@ public class NoteController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime localDate) {
         if (bucket.tryConsume(1)) {
             return ResponseEntity.ok(service.findByCreatedAt(localDate));
+        }
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
+    }
+
+    @GetMapping("page")
+    public ResponseEntity<Page<Note>> getPaginatedBooks(Pageable pageable) {
+        if (bucket.tryConsume(1)) {
+            Page<Note> notes = paginatedService.getNotesPage(pageable);
+            return ResponseEntity.ok(notes);
+        }
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
+    }
+
+    @GetMapping("page/count")
+    public ResponseEntity<Integer> getNumberOfPages(@RequestParam(defaultValue = "10") int size) {
+        if (bucket.tryConsume(1)) {
+            int number = paginatedService.getNumberOfPages(size);
+            return ResponseEntity.ok(number);
         }
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
     }

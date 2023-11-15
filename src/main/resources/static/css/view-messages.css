@@ -405,3 +405,10 @@ form {
     width: 100%;
     text-align: center;
 }
+
+.page-link {
+    margin: 0 10px;
+    padding: 5px 16px;
+    background-color: red;
+    border-radius: 3px;
+}

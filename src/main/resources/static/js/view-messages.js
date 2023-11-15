@@ -1,7 +1,6 @@
 $(document).ready(function () {
 
     var htmlBody = $('body');
-//    var apiRoot = "https://noteapp-399113.appspot.com/api/notes/";
     var apiRoot = window.location.origin + "/api/notes/";
     var getButton = $('[name="getAllMessages"]');
     var messagesList = $('[data-messages-list]');
@@ -21,7 +20,8 @@ $(document).ready(function () {
     var fetchedMessagesList;
     var token = $("meta[name='_csrf']").attr("content");
     var header = $("meta[name='_csrf_header']").attr("content");
-    
+    var paginationMenu = $('#paginationMenu');
+
     $.ajaxPrefilter(function(options, originalOptions, jqXHR) {
         jqXHR.setRequestHeader('X-CSRF-Token', token);
     });
@@ -136,106 +136,7 @@ $(document).ready(function () {
         return message;
     }
 
-    function getMessages(messages) {
 
-        sortList(messages);
-        fetchedMessagesList = messages;
-
-        $('#paginationMenu').pagination({
-            dataSource: messages,
-            pageSize: 10,
-            callback: function (data, pagination) {
-                displayData(data);
-            },
-            activeClassName: "activePage"
-        })
-        messagesList.removeClass('hidden');
-        sortingBlock.removeClass('hidden');
-        datePicker.removeClass('hidden');
-        filterButton.removeClass('hidden');
-        messagesList.slideDown(1000);
-    }
-
-    function sortList(messages) {
-        var actualSelectedOption = sortingBlock.val();
-        messages.sort(function (a, b) {
-            var aDate = new Date(a.createdAt);
-            var bDate = new Date(b.createdAt);
-
-            switch (actualSelectedOption) {
-                case 'sortDateUp':
-                    if (aDate < bDate) {
-                        return -1;
-                    } else if (aDate > bDate) {
-                        return 1;
-                    } else {
-                        var aTime = aDate.getTime();
-                        var bTime = bDate.getTime();
-
-                        if (aTime < bTime) {
-                            return 1;
-                        } else if (aTime > bTime) {
-                            return -1;
-                        } else {
-                            return 0;
-                        }
-                    }
-                    break;
-                case 'sortDateDown':
-                    if (aDate < bDate) {
-                        return 1;
-                    } else if (aDate > bDate) {
-                        return -1;
-                    } else {
-                        var aTime = aDate.getTime();
-                        var bTime = bDate.getTime();
-
-                        if (aTime < bTime) {
-                            return -1;
-                        } else if (aTime > bTime) {
-                            return 1;
-                        } else {
-                            return 0;
-                        }
-                    }
-                    break;
-                case 'sortTitleUp':
-                    var aTitle = a.title.toLowerCase();
-                    var bTitle = b.title.toLowerCase();
-
-                    if (aTitle > bTitle) {
-                        return 1;
-                    } else if (aTitle < bTitle) {
-                        return -1;
-                    } else {
-                        return 0;
-                    }
-                    break;
-                case 'sortTitleDown':
-                    var aTitle = a.title.toLowerCase();
-                    var bTitle = b.title.toLowerCase();
-
-                    if (aTitle > bTitle) {
-                        return -1;
-                    } else if (aTitle < bTitle) {
-                        return 1;
-                    } else {
-                        return 0;
-                    }
-                    break;
-            }
-        });
-
-        return messages;
-    }
-
-    function displayData(data) {
-        messagesList.empty();
-        var actualSelectedOption = sortingBlock.val();
-        data.forEach(function (element) {
-            createMessage(element).appendTo(messagesList);
-        });
-    }
 
     function updateMessage(button, title, body, id) {
         body.slideDown();
@@ -329,20 +230,6 @@ $(document).ready(function () {
             });
     }
 
-    function getAllMessages(event) {
-        var connectionUrl = apiRoot;
-
-        $.ajax({
-            url: connectionUrl,
-            method: "GET",
-            dataType: 'json',
-            success: getMessages,
-            error: function (xhr) {
-                showError("Error at fetching all data from server", xhr);
-            }
-        });
-    }
-
     sortingBlock.change(function () {
         var listItems = fetchedMessagesList;
         sortList(listItems);
@@ -352,8 +239,6 @@ $(document).ready(function () {
             createMessage(element).appendTo(messagesList);
         });
     });
-
-    getButton.on("click", getAllMessages);
 
     filterButton.on("click", function () {
         var pickedDate = datePicker.val();
@@ -455,15 +340,171 @@ $(document).ready(function () {
         }, 3000);
     }
 
-        function showError(message, xhr) {
-            if (xhr.status == "429") {
-                message = "Too many requests";
-            }
-            var confirmDiv = $('<div>').attr('id', 'toast').addClass('show').addClass('error').text(message);
-            htmlBody.append(confirmDiv);
-
-            setTimeout(function () {
-                confirmDiv.toggleClass('show');
-            }, 3000);
+    function showError(message, xhr) {
+        if (xhr.status == "429") {
+            message = "Too many requests";
         }
+        var confirmDiv = $('<div>').attr('id', 'toast').addClass('show').addClass('error').text(message);
+        htmlBody.append(confirmDiv);
+
+        setTimeout(function () {
+            confirmDiv.toggleClass('show');
+        }, 3000);
+    }
+
+//    GET PAGINATED MESSAGES: -------------------------------------------------------------------------------
+//    After button is clicked fetch data of how many pages to create;
+//    Create on paginationMenu the pages and set one of them to active;
+//    Send request to REST API with sorting method
+//    Sort data in REST API and send back requested page
+
+    function getAllMessages(event) {
+        var connectionUrl = apiRoot;
+        generatePagination();
+        $.ajax({
+            url: connectionUrl,
+            method: "GET",
+            dataType: 'json',
+            success: getMessages,
+            error: function (xhr) {
+                showError("Error at fetching all data from server", xhr);
+            }
+        });
+    }
+
+    function sortList(messages) {
+        var actualSelectedOption = sortingBlock.val();
+        messages.sort(function (a, b) {
+            var aDate = new Date(a.createdAt);
+            var bDate = new Date(b.createdAt);
+
+            switch (actualSelectedOption) {
+                case 'sortDateUp':
+                    if (aDate < bDate) {
+                        return -1;
+                    } else if (aDate > bDate) {
+                        return 1;
+                    } else {
+                        var aTime = aDate.getTime();
+                        var bTime = bDate.getTime();
+
+                        if (aTime < bTime) {
+                            return 1;
+                        } else if (aTime > bTime) {
+                            return -1;
+                        } else {
+                            return 0;
+                        }
+                    }
+                    break;
+                case 'sortDateDown':
+                    if (aDate < bDate) {
+                        return 1;
+                    } else if (aDate > bDate) {
+                        return -1;
+                    } else {
+                        var aTime = aDate.getTime();
+                        var bTime = bDate.getTime();
+
+                        if (aTime < bTime) {
+                            return -1;
+                        } else if (aTime > bTime) {
+                            return 1;
+                        } else {
+                            return 0;
+                        }
+                    }
+                    break;
+                case 'sortTitleUp':
+                    var aTitle = a.title.toLowerCase();
+                    var bTitle = b.title.toLowerCase();
+
+                    if (aTitle > bTitle) {
+                        return 1;
+                    } else if (aTitle < bTitle) {
+                        return -1;
+                    } else {
+                        return 0;
+                    }
+                    break;
+                case 'sortTitleDown':
+                    var aTitle = a.title.toLowerCase();
+                    var bTitle = b.title.toLowerCase();
+
+                    if (aTitle > bTitle) {
+                        return -1;
+                    } else if (aTitle < bTitle) {
+                        return 1;
+                    } else {
+                        return 0;
+                    }
+                    break;
+            }
+        });
+
+        return messages;
+    }
+
+    function displayData(data) {
+        messagesList.empty();
+        var actualSelectedOption = sortingBlock.val();
+        data.forEach(function (element) {
+            createMessage(element).appendTo(messagesList);
+        });
+    }
+
+    function getMessages(messages) {
+        fetchedMessagesList = messages;
+        sortList(messages);
+        displayData(messages);
+        messagesList.removeClass('hidden');
+        sortingBlock.removeClass('hidden');
+        datePicker.removeClass('hidden');
+        filterButton.removeClass('hidden');
+        messagesList.slideDown(1000);
+    }
+
+    function loadPage(i) {
+        var link = apiRoot + 'page?page=' + (i-1) + "&size=" + itemsPerPage;
+//        check which sorting is enabled
+//        pass sorting type to GET request
+        $.ajax({
+            url: link,
+            method: "GET",
+            contentType: "application/json",
+            success: function(data) {
+                getMessages(data.content);
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                showError("Error at filtering data", xhr);
+            }
+        });
+    }
+
+    function generatePagination(data) {
+        paginationMenu.empty();
+        var countedPages = data;
+        for (let i = 1; i <= countedPages; i++) {
+            var page = $('<button>').addClass('page-link').text(i).on('click', function() {
+                loadPage(i);
+            });
+            paginationMenu.append(page);
+        }
+        loadPage(1);
+    }
+
+    function getTotalPages() {
+        var src = apiRoot + "page/count";
+        $.ajax({
+            url: src,
+            method: "GET",
+            contentType: "application/json",
+            success: generatePagination,
+            error: function (xhr, textStatus, errorThrown) {
+                showError("Error at filtering data", xhr);
+            }
+        });
+    }
+
+    getButton.on("click", getTotalPages);
 });
