@@ -21,6 +21,7 @@ $(document).ready(function () {
     var token = $("meta[name='_csrf']").attr("content");
     var header = $("meta[name='_csrf_header']").attr("content");
     var paginationMenu = $('#paginationMenu');
+    var pageNumberGlobal;
 
     $.ajaxPrefilter(function(options, originalOptions, jqXHR) {
         jqXHR.setRequestHeader('X-CSRF-Token', token);
@@ -79,7 +80,7 @@ $(document).ready(function () {
             },
             complete: function () {
                 modal.hide();
-                getAllMessages();
+                loadPage(pageNumberGlobal);
                 showConfirm();
             }
         });
@@ -136,8 +137,6 @@ $(document).ready(function () {
         return message;
     }
 
-
-
     function updateMessage(button, title, body, id) {
         body.slideDown();
 
@@ -183,7 +182,8 @@ $(document).ready(function () {
     function afterUpdate(button) {
         button.on('click', updateMessage);
         showAlert("UPDATED", "Message has been updated", getAllMessages);
-        sortMessageList();
+//        sortMessageList();
+        loadPage(pageNumberGlobal);
     }
 
     function replaceInputWithText(titleInput, bodyInput, title, body) {
@@ -229,16 +229,6 @@ $(document).ready(function () {
                 }
             });
     }
-
-    sortingBlock.change(function () {
-        var listItems = fetchedMessagesList;
-        sortList(listItems);
-        messagesList.empty();
-
-        listItems.forEach(function (element) {
-            createMessage(element).appendTo(messagesList);
-        });
-    });
 
     filterButton.on("click", function () {
         var pickedDate = datePicker.val();
@@ -352,12 +342,13 @@ $(document).ready(function () {
         }, 3000);
     }
 
-//    GET PAGINATED MESSAGES: -------------------------------------------------------------------------------
-//    After button is clicked fetch data of how many pages to create;
-//    Create on paginationMenu the pages and set one of them to active;
-//    Send request to REST API with sorting method
-//    Sort data in REST API and send back requested page
+//    SORTING DATA ALGORITHM
+    sortingBlock.change(function () {
+        messagesList.empty();
+        loadPage(pageNumberGlobal);
+    });
 
+//    GET PAGINATED MESSAGES: -------------------------------------------------------------------------------
     function getAllMessages(event) {
         var connectionUrl = apiRoot;
         generatePagination();
@@ -372,79 +363,6 @@ $(document).ready(function () {
         });
     }
 
-    function sortList(messages) {
-        var actualSelectedOption = sortingBlock.val();
-        messages.sort(function (a, b) {
-            var aDate = new Date(a.createdAt);
-            var bDate = new Date(b.createdAt);
-
-            switch (actualSelectedOption) {
-                case 'sortDateUp':
-                    if (aDate < bDate) {
-                        return -1;
-                    } else if (aDate > bDate) {
-                        return 1;
-                    } else {
-                        var aTime = aDate.getTime();
-                        var bTime = bDate.getTime();
-
-                        if (aTime < bTime) {
-                            return 1;
-                        } else if (aTime > bTime) {
-                            return -1;
-                        } else {
-                            return 0;
-                        }
-                    }
-                    break;
-                case 'sortDateDown':
-                    if (aDate < bDate) {
-                        return 1;
-                    } else if (aDate > bDate) {
-                        return -1;
-                    } else {
-                        var aTime = aDate.getTime();
-                        var bTime = bDate.getTime();
-
-                        if (aTime < bTime) {
-                            return -1;
-                        } else if (aTime > bTime) {
-                            return 1;
-                        } else {
-                            return 0;
-                        }
-                    }
-                    break;
-                case 'sortTitleUp':
-                    var aTitle = a.title.toLowerCase();
-                    var bTitle = b.title.toLowerCase();
-
-                    if (aTitle > bTitle) {
-                        return 1;
-                    } else if (aTitle < bTitle) {
-                        return -1;
-                    } else {
-                        return 0;
-                    }
-                    break;
-                case 'sortTitleDown':
-                    var aTitle = a.title.toLowerCase();
-                    var bTitle = b.title.toLowerCase();
-
-                    if (aTitle > bTitle) {
-                        return -1;
-                    } else if (aTitle < bTitle) {
-                        return 1;
-                    } else {
-                        return 0;
-                    }
-                    break;
-            }
-        });
-
-        return messages;
-    }
-
     function displayData(data) {
         messagesList.empty();
         var actualSelectedOption = sortingBlock.val();
@@ -455,7 +373,6 @@ $(document).ready(function () {
 
     function getMessages(messages) {
         fetchedMessagesList = messages;
-        sortList(messages);
         displayData(messages);
         messagesList.removeClass('hidden');
         sortingBlock.removeClass('hidden');
@@ -464,14 +381,17 @@ $(document).ready(function () {
         messagesList.slideDown(1000);
     }
 
-    function loadPage(i) {
-        var link = apiRoot + 'page?page=' + (i-1) + "&size=" + itemsPerPage;
-//        check which sorting is enabled
-//        pass sorting type to GET request
+    function getData(pageNumber, sortingType) {
+        var link = apiRoot + 'page';
         $.ajax({
             url: link,
             method: "GET",
             contentType: "application/json",
+            data: {
+                page: (pageNumber-1),
+                size: itemsPerPage,
+                sort: sortingType
+            },
             success: function(data) {
                 getMessages(data.content);
             },
@@ -480,6 +400,30 @@ $(document).ready(function () {
             }
         });
     }
+
+        function loadPage(i) {
+            var sortingType;
+            var chosenSorting = sortingBlock.val();
+            pageNumberGlobal = i;
+            switch (chosenSorting) {
+                case 'sortDateUp':
+                    sortingType = 'createdAt,asc';
+                    getData(i, sortingType);
+                    break;
+                case 'sortDateDown':
+                    sortingType = 'createdAt,desc';
+                    getData(i, sortingType);
+                    break;
+                case 'sortTitleUp':
+                    sortingType = 'title,asc';
+                    getData(i, sortingType);
+                    break;
+                case 'sortTitleDown':
+                    sortingType = 'title,desc';
+                    getData(i, sortingType);
+                    break;
+            }
+        }
 
     function generatePagination(data) {
         paginationMenu.empty();
@@ -490,7 +434,6 @@ $(document).ready(function () {
             });
             paginationMenu.append(page);
         }
-        loadPage(1);
     }
 
     function getTotalPages() {
@@ -506,5 +449,6 @@ $(document).ready(function () {
         });
     }
 
-    getButton.on("click", getTotalPages);
+    getTotalPages();
+    loadPage(1);
 });

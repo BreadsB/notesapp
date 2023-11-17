@@ -148,7 +148,7 @@ public class NoteController {
     }
 
     @GetMapping("page")
-    public ResponseEntity<Page<Note>> getPaginatedBooks(Pageable pageable) {
+    public ResponseEntity<Page<Note>> getPaginatedNotes(Pageable pageable) {
         if (bucket.tryConsume(1)) {
             Page<Note> notes = paginatedService.getNotesPage(pageable);
             return ResponseEntity.ok(notes);
