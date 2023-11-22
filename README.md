@@ -13,6 +13,7 @@ Technology stack:
 - Spring JPA
 - Swagger (Describing REST API)
 - Thymeleaf (process web files and connect them with Spring Boot app)
+- HTML, CSS, jQuery (handle frontend)
 
 Application is secured from:
 - Brute-force login attempts
