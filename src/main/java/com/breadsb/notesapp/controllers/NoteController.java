@@ -1,6 +1,7 @@
 package com.breadsb.notesapp.controllers;
 
 import com.breadsb.notesapp.entities.Note;
+import com.breadsb.notesapp.services.NotePaginatedService;
 import com.breadsb.notesapp.services.NoteService;
 import io.github.bucket4j.Bucket;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,6 +12,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -23,23 +26,22 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/notes/")
-//@RequiredArgsConstructor
+@RequestMapping("/api/notes")
 @CrossOrigin("*")
 public class NoteController {
 
     @Autowired
     private final NoteService service;
-//    private final String API_PATH = "https://noteapp-399113.appspot.com/api/notes/";
-    private final String path = "${pageContext.request.requestURL}";
+    @Autowired
+    private final NotePaginatedService paginatedService;
     Bucket bucket;
 
-    public NoteController(NoteService service) {
+    public NoteController(NoteService service, NotePaginatedService paginatedService) {
         this.service = service;
+        this.paginatedService = paginatedService;
         bucket = Bucket.builder()
-                .addLimit(limit -> limit.capacity(6).refillGreedy(6,Duration.ofMinutes(1)))
+                .addLimit(limit -> limit.capacity(10).refillGreedy(6,Duration.ofMinutes(1)))
                 .build();
-        System.out.println(path);
     }
 
     @Operation(summary = "Get a note by its id")
@@ -53,7 +55,7 @@ public class NoteController {
             @ApiResponse(responseCode = "400", description = "Invalid id supplied", content = @Content),
             @ApiResponse(responseCode = "404", description = "Book not found", content = @Content)
     })
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<Note> get(@Parameter(description = "Id of a book to search") @PathVariable Long id) {
         if (bucket.tryConsume(1)) {
             return ResponseEntity.ok(service.getNoteById(id));
@@ -71,8 +73,6 @@ public class NoteController {
     public ResponseEntity<Void> post(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Note JSON object to be transfered") @Valid @RequestBody Note note) {
         if (bucket.tryConsume(1)) {
             service.createNote(note);
-//            String uri = apiPath + note.getId();
-//            return ResponseEntity.created(URI.create(uri)).build();
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
@@ -102,13 +102,11 @@ public class NoteController {
             @ApiResponse(responseCode = "400", description = "Invalid id format", content = @Content),
             @ApiResponse(responseCode = "415", description = "No object has been sent (null value)", content = @Content)
     })
-    @PutMapping(value = "{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Note> put(@Parameter(description = "Id of a Note to update") @PathVariable Long id,
                                     @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Note JSON object") @Valid @RequestBody Note note) {
         if (bucket.tryConsume(1)) {
             service.updateNote(id, note);
-//            String uri = apiPath + id;
-//            return ResponseEntity.created(URI.create(uri)).build();
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
@@ -120,7 +118,7 @@ public class NoteController {
             @ApiResponse(responseCode = "404", description = "Note not found", content = @Content),
             @ApiResponse(responseCode = "400", description = "Invalid id format", content = @Content)
     })
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@Parameter(description = "Id of a Note to delete") @PathVariable Long id) {
         service.deleteNoteById(id);
         return ResponseEntity.ok().build();
@@ -132,13 +130,31 @@ public class NoteController {
             @ApiResponse(responseCode = "404", description = "Notes not found", content = @Content),
             @ApiResponse(responseCode = "415", description = "Null DateTime parameter", content = @Content)
     })
-    @GetMapping(value = "by-date/")
+    @GetMapping(value = "/by-date")
     public ResponseEntity<List<Note>> getNotesByDate(
             @Parameter(description = "Time and date when notes were created")
             @RequestParam("timestamp")
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime localDate) {
         if (bucket.tryConsume(1)) {
             return ResponseEntity.ok(service.findByCreatedAt(localDate));
+        }
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
+    }
+
+    @GetMapping("/page")
+    public ResponseEntity<Page<Note>> getPaginatedNotes(Pageable pageable) {
+        if (bucket.tryConsume(1)) {
+            Page<Note> notes = paginatedService.getNotesPage(pageable);
+            return ResponseEntity.ok(notes);
+        }
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
+    }
+
+    @GetMapping("/page/count")
+    public ResponseEntity<Integer> getNumberOfPages(@RequestParam(defaultValue = "10") int size) {
+        if (bucket.tryConsume(1)) {
+            int number = paginatedService.getNumberOfPages(size);
+            return ResponseEntity.ok(number);
         }
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
     }
