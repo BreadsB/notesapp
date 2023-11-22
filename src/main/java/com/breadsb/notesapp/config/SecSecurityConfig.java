@@ -6,9 +6,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.AbstractRequestMatcherRegistry;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -22,12 +24,10 @@ import org.springframework.security.web.SecurityFilterChain;
 @PropertySource("classpath:security-config.properties")
 public class SecSecurityConfig {
 
-//    @Value("${sm://projects/130607545475/secrets/security_user_login}")
-    @Value("${security.login.user}")
+    @Value("${sm://projects/130607545475/secrets/security_user_login}")
     private String userLogin;
 
-//    @Value("${sm://projects/130607545475/secrets/security_user_password}")
-    @Value("${security.password.user.local}")
+    @Value("${sm://projects/130607545475/secrets/security_user_password}")
     private String userPassword;
 
     @Bean
@@ -53,8 +53,6 @@ public class SecSecurityConfig {
                         .hasRole("USER")
                         .requestMatchers("/login")
                         .permitAll()
-//                        .requestMatchers("/favico.ico")
-//                        .permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
@@ -71,10 +69,6 @@ public class SecSecurityConfig {
                         .deleteCookies("JSESSIONID")
                         .permitAll()
                 );
-//                .requiresChannel(channel -> channel
-//                        .requestMatchers(r -> r.getHeader("X-Forwarded-Proto") != null)
-//                        .requiresSecure()
-//                );
 
         return http.build();
     }

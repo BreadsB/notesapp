@@ -47,7 +47,7 @@ dependencies {
 	testImplementation 'org.springframework.security:spring-security-test'
 	implementation 'com.bucket4j:bucket4j-core:8.5.0'
 	implementation 'com.google.cloud:spring-cloud-gcp-starter:4.1.2'
-//	implementation 'com.google.cloud:spring-cloud-gcp-starter-sql-postgresql:4.8.3'
+	implementation 'com.google.cloud:spring-cloud-gcp-starter-sql-postgresql:4.8.3'
 	implementation 'com.google.cloud:spring-cloud-gcp-starter-secretmanager:4.8.3'
 }
 
