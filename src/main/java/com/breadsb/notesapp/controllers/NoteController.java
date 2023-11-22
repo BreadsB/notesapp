@@ -53,7 +53,7 @@ public class NoteController {
                             )
                     }),
             @ApiResponse(responseCode = "400", description = "Invalid id supplied", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Book not found", content = @Content)
+            @ApiResponse(responseCode = "404", description = "Note not found", content = @Content)
     })
     @GetMapping("/{id}")
     public ResponseEntity<Note> get(@Parameter(description = "Id of a book to search") @PathVariable Long id) {
@@ -78,7 +78,7 @@ public class NoteController {
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
     }
 
-    @Operation(summary = "Get all existing messages")
+    @Operation(summary = "Get all existing notes")
     @ApiResponses( value = {
             @ApiResponse(responseCode = "200", description = "Found a list of notes",
                     content = {
@@ -95,7 +95,7 @@ public class NoteController {
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
     }
 
-    @Operation(summary = "Update message with supplied id")
+    @Operation(summary = "Update note with supplied id")
     @ApiResponses( value = {
             @ApiResponse(responseCode = "201", description = "Updated a note", content = @Content),
             @ApiResponse(responseCode = "404", description = "Note not found", content = @Content),
@@ -103,8 +103,10 @@ public class NoteController {
             @ApiResponse(responseCode = "415", description = "No object has been sent (null value)", content = @Content)
     })
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Note> put(@Parameter(description = "Id of a Note to update") @PathVariable Long id,
-                                    @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Note JSON object") @Valid @RequestBody Note note) {
+    public ResponseEntity<Note> put(
+            @Parameter(description = "Id of a Note to update") @PathVariable Long id,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Note JSON object") @Valid @RequestBody Note note
+    ) {
         if (bucket.tryConsume(1)) {
             service.updateNote(id, note);
             return ResponseEntity.ok().build();
@@ -112,19 +114,21 @@ public class NoteController {
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
     }
 
-    @Operation(summary = "Delete message with supplied id")
+    @Operation(summary = "Delete note with supplied id")
     @ApiResponses( value = {
             @ApiResponse(responseCode = "201", description = "Deleted a note", content = @Content),
             @ApiResponse(responseCode = "404", description = "Note not found", content = @Content),
             @ApiResponse(responseCode = "400", description = "Invalid id format", content = @Content)
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@Parameter(description = "Id of a Note to delete") @PathVariable Long id) {
+    public ResponseEntity<Void> delete(
+            @Parameter(description = "Id of a Note to delete") @PathVariable Long id
+    ) {
         service.deleteNoteById(id);
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "Find all messages created at supplied Date&Time")
+    @Operation(summary = "Find all notes created at supplied Date&Time")
     @ApiResponses( value = {
             @ApiResponse(responseCode = "200", description = "Found notes", content = @Content),
             @ApiResponse(responseCode = "404", description = "Notes not found", content = @Content),
@@ -134,15 +138,29 @@ public class NoteController {
     public ResponseEntity<List<Note>> getNotesByDate(
             @Parameter(description = "Time and date when notes were created")
             @RequestParam("timestamp")
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime localDate) {
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime localDate
+    ) {
         if (bucket.tryConsume(1)) {
             return ResponseEntity.ok(service.findByCreatedAt(localDate));
         }
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
     }
 
+    @Operation(summary = "Get page of notes (list with 10 notes)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Found a page with notes",
+                    content = {
+                            @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = Pageable.class)
+                            )
+                    }),
+            @ApiResponse(responseCode = "400", description = "Invalid parameters supplied", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Page not found", content = @Content)
+    })
     @GetMapping("/page")
-    public ResponseEntity<Page<Note>> getPaginatedNotes(Pageable pageable) {
+    public ResponseEntity<Page<Note>> getPaginatedNotes(
+            @Parameter(description = "Page with list of Notes") Pageable pageable
+    ) {
         if (bucket.tryConsume(1)) {
             Page<Note> notes = paginatedService.getNotesPage(pageable);
             return ResponseEntity.ok(notes);
@@ -150,8 +168,15 @@ public class NoteController {
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
     }
 
+    @Operation(summary = "Count number of pages in Note repository")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Counted number of pages"),
+            @ApiResponse(responseCode = "404", description = "Number of pages was not counted")
+    })
     @GetMapping("/page/count")
-    public ResponseEntity<Integer> getNumberOfPages(@RequestParam(defaultValue = "10") int size) {
+    public ResponseEntity<Integer> getNumberOfPages(
+            @Parameter(description = "Number of elements that will be presented on single Page") @RequestParam(defaultValue = "10") int size
+    ) {
         if (bucket.tryConsume(1)) {
             int number = paginatedService.getNumberOfPages(size);
             return ResponseEntity.ok(number);
