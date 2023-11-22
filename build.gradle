@@ -5,6 +5,7 @@ plugins {
 }
 
 group = 'com.breadsb'
+version = "1.0";
 
 java {
 	sourceCompatibility = '17'
